@@ -1,9 +1,9 @@
 /*
  * @Author: xue yunlong
  * @Date: 2021-05-06 10:02:32
- * @LastEditTime: 2021-05-06 11:45:50
+ * @LastEditTime: 2021-05-07 10:13:45
  * @LastEditors: Please set LastEditors
- * @Description: 读取文件工具箱，node
+ * @Description: 读取文件，node
  * @FilePath: \html\plugin\generatedDirectory.js
  */
 
