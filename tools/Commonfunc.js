@@ -1,13 +1,13 @@
 /*
  * @Author: your name
  * @Date: 2021-05-07 10:00:03
- * @LastEditTime: 2021-05-07 11:29:23
+ * @LastEditTime: 2021-05-07 18:55:19
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \html\plugin\Commonfunc.js
  */
 /**
- * @description: 节流,n秒内只会执行一次
+ * @description: 节流,n秒内只会延迟执行一次
  * @param {*} func
  * @param {*} intervalTime
  * @return {*}
@@ -27,12 +27,12 @@ function throttle(func, intervalTime) {
 
 
 /**
- * @description: 防抖,n秒内只会执行一次，多次触发会刷新时间
+ * @description: 防抖,n秒内只会延迟执行一次，多次触发会刷新时间
  * @param {*} func
  * @param {*} intervalTime
  * @return {*}
  */
-export function debounce(func, intervalTime) {
+function debounce(func, intervalTime) {
     let timer = null
     return function () {
         clearTimeout(timer);
@@ -44,7 +44,7 @@ export function debounce(func, intervalTime) {
 
 
 /**
- * @description: 
+ * @description: 日期格式化
  * @param {*} date
  * @param {*} format
  * @return {*}
@@ -52,6 +52,58 @@ export function debounce(func, intervalTime) {
 function formatDate(date, format) {
 
 }
+
+/**
+ * @description: 深度拷贝 ,包括基础类型，数组,时间，Set,Map,普通{},
+ * @param {*} obj
+ * @return {*}
+ */
+function deepCopy(obj) {
+    let result = null;
+    if (obj != null && obj != undefined && typeof obj == "object") {
+        //判断对象是否为引用类型
+        if (typeof obj[Symbol.iterator] == "function") {
+            //判断对象是否是可迭代对象,for of 可以遍历所有的迭代类型，他走的实际上是Symbol.iterator的实现。
+            //Array（数组）, String（字符串）, Map（映射）, Set（集合）,TypedArray(类型化数组)、arguments、NodeList对象、Generator等可迭代的数据结构等
+            //{}不是迭代类型
+            if (obj instanceof Set) {
+                result = new Set();
+                for (item of obj) {
+                    result.add(deepCopy(item));
+                }
+            } else if (obj instanceof Array) {
+                result = [];
+                for (item of obj) {
+                    result.push(deepCopy(item));
+                }
+            } else if (obj instanceof Map) {
+                result = new Map();
+                for (item of obj) {
+                    result.set(item[0], deepCopy(item[1]));
+                }
+            }
+            else {
+                throw new Error("包含无法处理的对象" + obj)
+            }
+        } else if (obj.__proto__ == Date.prototype) {
+            //判断对象是否是时间
+            result = new Date(obj.valueOf());
+        } else {
+            //类型是{}
+            result = {}
+            for (key in obj) {
+                //for in 实际上是对对象的属性枚举，并不是一个真正的迭代
+                result[key] = deepCopy(obj[key]);
+            }
+        }
+    } else {
+        result = obj;
+    }
+    return result;
+}
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-Html和ES6模块
+Html 中使用ES6模块
 
 * es6模块本身受限于同源策略的，默认会发起cors跨域请求,跨域请求仅仅支持http, data, chrome, chrome-extension, chrome-untrusted, https。所以本地直接调用html引入module使用的是file协议，因此就会跨域，为了本地测试没有问题，需要启动本地服务器。
 * 传统脚本支持跨域。
