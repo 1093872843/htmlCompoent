@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-05-08 17:54:31
- * @LastEditTime: 2021-05-08 18:34:15
+ * @LastEditTime: 2021-05-08 18:51:20
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \html\数据结构和设计模式\数组.js
@@ -35,9 +35,6 @@ let arrayFlatten = (function (value) {
 
     return {funcOne,funcTwo,funcThree}
 })()
-
-
-//
 
 
 
