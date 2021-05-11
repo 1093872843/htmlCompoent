@@ -1,4 +1,4 @@
-# 传统的继承方式
+# 传统的类
 
 虽然ES6出来了Class取代了传统的继承模式，但是就目前来看，ES6的类仅仅是封装了ES5的构造函数加原型继承的语法糖。
 
@@ -6,7 +6,7 @@
 
 这里假设我们需要一个方法，能够让我们产出我们指定属性内容的对象，仅仅是值得不同，我们会怎么做? 如下
 
-## 如何创建一个制造对象的函数。
+### 如何创建一个制造对象的函数。
 
 ```javascript
 function createPerson(name,age){
@@ -63,7 +63,7 @@ console.log(p instanceof Object); //true
 
 ~~~
 
-## 原型模式
+### 原型模式
 
 `原型（prototype）`：每个**函数**都会创建一个prototype属性，这个属性是一个对象，即我们常说的原型。原型的特性在于，内部的所有属性和方法可以被实例共享,所以我们原本应当写在函数中的内容，也可以通过操作这个对象（原型）来实现。
 
@@ -82,8 +82,6 @@ console.log(person.prototype);// person {}
 !!!!!!!!!!!!!!!!!!注意：!!!!!!!!!!!!!!!!
 
 而通过原型新增的属性数据是共享的，是共享的，共享的，一个实例修改会影响其他实例。
-
----
 
 我们之前说过，通过构造函数创建的实例是完全独立的，这就意味着每一次创建都会重新定义一边函数中的所有内容。这对于内部属性来说自然没什么问题。但是对于构造函数中的函数来说，就显得没那么必要了，反而会有点消耗性能。
 
@@ -165,22 +163,114 @@ console.log(Person.prototype.__proto__ == p.__proto__.__proto__);//ture
 
 ## 继承
 
-所谓继承，本质上时修改__proto__的指向，但是直接修改__proto__的影响是非常微妙和深远的，将会改变所有和__proto__有关的代码。所以我们可以使用Object.create(\__proto\_\_),这将会创建一个新的对象同时为它指定一个原型。
+所谓继承，本质上是修改构造函数A的原型为另一个函数B的原型，并通过其他手段，完善所有属性和方法的继承，使得通过A的实例既能访问A的内容，又能访问B的内容。
+
+但是js的继承和Java的类不同，它主要关注的是继承能够实现的数据传递和共享功能，而不是和java那样实现一个类的引用类型继承。组合式和寄生时组合继承最贴近Java的类继承
+
+##### 组合式继承
 
 ~~~javascript
-const person = {
-  isHuman: false,
-  printIntroduction: function() {
-    console.log(`My name is ${this.name}. Am I human? ${this.isHuman}`);
+//原理: 原型链+盗用构造函数，实现了完整的继承
+function Father(name) {
+  this.name = name;
+  this.fatherParams = "我是父亲的元素"
+  this.say = function () {
+    console.log("father "+this.name);
   }
-};
+  
+}
 
-const me = Object.create(person);
+function Son(name) {
+  Father.call(this, name)//必须放在首位，以免同名属性覆盖子属性
+  this.sonParams = "我是儿子的元素"
+  this.say = function () {
+    console.log("son "+this.name);
+  }
+}
 
-me.name = 'Matthew'; // "name" is a property set on "me", but not on "person"
-me.isHuman = true; // inherited properties can be overwritten
+Son.prototype = new Father();
+Son.prototype.addF = function () {
+  console.log("为儿子新增方法");
+}
 
-me.printIntroduction();//My name is Matthew. Am I human? true
+let sonPer = new Son("wang");
+console.log(sonPer);
+sonPer.say()//判断儿子是否遮蔽父亲同名方法且是否继承了父亲的构造函数参数
+delete sonPer.say;sonPer.say()//判断父亲的同名方法是否在儿子原型上0
+console.log(sonPer.fatherParams); //判断儿子是否继承父亲属性
+console.log(sonPer.sonParams); //判断儿子属性是否正常
+sonPer.addF()//儿子是否正常新增方法
+
+~~~
+
+原型式继承
+
+~~~javascript
+//只继承了原型，不继承构造函数属性。
+//这种继承主要用于共享数据。
+let person={
+  name:"hi",
+  friend:["a","b","v"],
+}
+
+let aPerson = Object.create(person);
+aPerson.friend.push("aa");
+let bPerson = Object.create(person);
+bPerson.friend.push("bb");
+
+console.log(bPerson.friend);
+~~~
+
+寄生式继承
+
+~~~javascript
+//主要关注功能的增强，原型继承反而不是必须的，
+let person={
+  name:"hi",
+  friend:["a","b","v"],
+}
+
+function createAnthor(orignal){
+  let clone = Object.create(orignal);
+  clone.sayHi= function (){
+    console.log("增强函数");
+  };
+  return clone
+}
+
+let newPerson = createAnthor(person)
+newPerson.sayHi();
+~~~
+
+寄生式组合继承
+
+~~~javascript
+//解决了组合继承的效率问题，组合继承的父类构造函数始终会被调用两次。
+//盗用构造函数+寄生式继承
+//重写原型，补完原型constructor，
+function Father(name) {
+  this.name = name;
+  this.fatherParams = "我是父亲的元素"
+  this.say = function () {
+    console.log(this.constructor);
+  }
+  
+}
+
+function Son(name) {
+  Father.call(this, name)//必须放在首位，以免同名属性覆盖子属性
+  this.sonParams = "我是儿子的元素"
+
+}
+function extendfunc(subFun,superFun){
+    let clone = Object.create(superFun.prototype);
+    clone.constructor = subFun;
+    subFun.prototy = clone;
+}
+
+extendfunc(Son,Father);
+let son = new Son("wang")
+son.say();
 ~~~
 
 `原型层级：`在通过对象访问属性时，访问会开始于对象实例本身，如果这个实例上存在给定属性，则返回对应的值，如果不存在，则在原型对象上查找值。这也是原型用于在多个实例间共享属性和方法的原理。
@@ -188,3 +278,130 @@ me.printIntroduction();//My name is Matthew. Am I human? true
 当实例和原型存在同名属性时，根据上述的访问规律，实例中的属性`遮蔽`原型中的属性，只返回示例中的属性。不过可以通过`delete`操作符可以删除实例上的属性。`hasOwnProperty()`会确定某个属性是来自实例，还是来自原型。
 
 # ES6新增Class
+
+#### 声明
+
+~~~javascript
+//类定义,类定义属于块作用域限制，类似let
+//类本身是一个特殊的函数，console.log((typeof Person) == "function");
+class Person{
+}
+
+//表达式声明
+const Animal = class {};
+
+//和普遍的表达式声明一样，如果类表达式声明，声明会被提升，但是类声明，则不会提升。
+//这里我理解的声明和ES6文档上的不一致，类表达式声明和类声明
+console.log(Person);//Cannot access 'Person' before initialization
+class Person{}
+console.log(Person);
+//------------分割线----------------------
+console.log(Person);//undefined
+var Person = class {}
+console.log(Person);//[class person]
+~~~
+
+#### 构成
+
+类的构成包括构造函数方法，实例方法，获取函数，设置函数和静态类方法，但是这些都不必须的
+
+~~~javascript
+class Foo{
+   
+    //#[属性]为私有属性，外部禁止访问
+    #name="wang"
+
+    /*如果想实现共享属性，那么可以在constructor中使用 Person.prototype.[属性]
+    并且添加相应的getter和setter*/
+
+   //构造函数，当使用new操作上时，本质上时调用这个函数进行实例化。
+   //constructor内部定义的属性和方法 在实例上独立。
+   //例外的是，类块中定义的属性，即使不在constructor内部，也属于实例属性。
+
+  constructor(){
+    this.age=18;
+     this.nickName = ["1","2","3"]
+   }
+
+  //在类块中定义的方法，，建立在原型prototype上，在实例之间共享。
+//setter和getter除外
+   getAge(){
+        return this.age;
+    }
+
+  //类方法等同于对象属性，因此可以使用表达式
+  //get [synbolKey]()
+  //get ["computed"+ "key"](){}
+   get name(){}
+   set name(){}
+
+
+  //每个类上面只能有一个，不要求必须通过实例或者原型调用，可以直接通过类调用
+  //非常适合做实例工厂，
+   static myQux(){}
+
+   //返回生成器方法
+   //使得该类创建的实例可以使用for of 方法去遍历this.nickName
+  *[Symbol.iterator](){
+      yield *this.nickName.entries();
+  }
+   //返回迭代器
+    [Symbol.iterator](){
+      return  this.nickName.entries();
+  }
+}
+~~~
+
+类-构造函数
+
+本质上依旧是构造函数，但是必须通过new 去调用。
+
+> 实际执行的过程。
+>
+> * 在内存中创建一个对象。
+> * 新对象的内部的[[Prototype]]指针被赋值为构造函数的prototype。
+> * 构造函数内部的this被复制为这个新对象。
+> * 执行构造函数内部的代码。
+> * 如果函数返回非空对象，则返回对象(注意此时返回的对象并不是类实例)，否则返回新建的对象this。
+
+### ES6继承
+
+ES6支持单继承，不支持接口实现，使用extends关键字，可以继承任何拥有[[Construct]]和原型的对象。这意味着类也可以继承普通的构造函数。
+
+~~~javascript
+class B{}//或者 function B(){}
+class A extends B{
+   //A的实现,
+//如果实现了constructor()，就必须写上super或者返回一个指定对象,
+/如果不实现constructor，js会自动实现并调用super
+    constructor(){
+       super()
+    }
+}
+
+//使用super关键字可以调用超类的内容，eg:
+//super() === super,constructor()
+//super.[方法]();
+~~~
+
+抽象基类
+
+虽然ES6不支持接口实现，但是可以通过手段达到这样的效果。
+
+`new.target`: 该关键字在类中使用，new.target可以判断当前类是通过new 哪个具体类实现的。
+
+~~~javascript
+class Person {
+  constructor(){
+      console.log(new.target);
+      if (new.target == Person) {
+          throw new Error("Person不能被直接初始化，他是个抽象基类")
+      }
+      //要求必须事先某个方法，因为在子类实例化之前，Person内部已经有了原型，可以通过this访问
+      if (!this.foo) {
+        throw new Error("必须实现foo方法")
+      }
+  }
+}
+
+~~~
