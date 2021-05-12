@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-05-07 10:00:03
- * @LastEditTime: 2021-05-07 18:55:19
+ * @LastEditTime: 2021-05-12 17:11:50
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \html\plugin\Commonfunc.js
@@ -102,8 +102,66 @@ function deepCopy(obj) {
     return result;
 }
 
+/**
+ * @description:  
+ * @param {*} 指定对象或基础类型，结果为null或者undefined或者Nan 必返回 false
+ * @param {*} 指定类型，字符串
+ * @return {*} 
+ */
+function isType(obj, type) {
+    if ((typeof type) == "string") {
+        if (obj == null || obj == undefined || obj == NaN) return false
+        if (Object.prototype.toString.call(obj) === `[object ${type.replace(/^\S/, s => s.toUpperCase())}]`) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        console.error("err function isType() : type must be String");
+    }
+
+}
+
+/**
+ * @description: [] {} "" NaN undefined Null 为空， 0不为空。
+ * @param {*} obj
+ * @return {*}
+ */
+function isEmity(obj) {
+    let result = false;
+    if (obj == null || obj == undefined || obj == NaN) return true
+    if (typeof (obj[Symbol.iterator]) == "function" && (obj.length == 0 || obj.size == 0)) {
+        return true
+    } else {
+        for (const key in obj) {
+            result = false;
+            break;
+        }
+    }
+    return result;
+}
 
 
-
+/**
+ * @description:切面函数，可以直接加载到原型上，让所有函数调用。
+ * @param {*}
+ * @return {*}
+ */
+ function aopElapsedTime() {
+    /* 一下代码并不会返回，只会在控制台输出，除非调试，否则不建议在正式环境中使用。
+     const sign = func.name+new Date().getTime();
+     console.time(sign)  //开始
+     func();
+     console.timeEnd(sign) //结束
+    */
+    //正式代码
+    const startTime = new Date().getTime();
+    let result = this(...arguments);
+    const endTime = new Date().getTime();
+    return [result, endTime - startTime];
+    //调用方式
+    //Function.prototype.aopElapsedTime = aopElapsedTime;
+    //fun.aopElapsedTime();
+}
 
 
