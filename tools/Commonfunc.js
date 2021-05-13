@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-05-07 10:00:03
- * @LastEditTime: 2021-05-12 17:11:50
+ * @LastEditTime: 2021-05-13 14:38:06
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \html\plugin\Commonfunc.js
@@ -164,4 +164,20 @@ function isEmity(obj) {
     //fun.aopElapsedTime();
 }
 
+/**
+ * @description: 休眠函数
+ * @param {*} time/ms
+ * @return {*}
+ */
+function sleep(time){
+    //原理时利用setTimeOut函数和Promise的异步回调特性；
+    //当time延时过后，返回Promise回调
+    return Promise(resolve=>{setTimeout(resolve,time)});
 
+    //使用方式
+    // async function sleepAsync() {
+    //     console.log('fuck the code')
+    //     await sleep(1000)
+    //     console.log('fuck the code again')
+    //   }
+}

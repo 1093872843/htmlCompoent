@@ -16,3 +16,4 @@
 * 判断对象类型 `isType(obj, type)`
 * 判断对象是否为空 `isEmity(obj)`
 * 切面-计算函数耗时 `aopElapsedTime`();
+* 休眠函数 sleep()

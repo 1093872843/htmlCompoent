@@ -33,3 +33,19 @@ import { method } from 'commonjs-package';
   await import('./my-app.mjs');
 })();
 ```
+
+## 下列代码输出的原因
+
+~~~javascript
+
+var b = 10;
+(function b(){
+    b = 20;
+    console.log(b); 
+})();//[Function: b]
+
+/*原因：
+在非匿名自执行函数中，函数变量优先于外部变量申明，且函数变量是只读状态
+可以使用严格模式验证，b=20操作将会报错。
+*/
+~~~
